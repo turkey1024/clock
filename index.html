@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QwQ</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            text-align: center;
+            background-color: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            width: 300px;
+        }
+        
+        .timer {
+            font-size: 5rem;
+            font-weight: bold;
+            margin: 20px 0;
+            color: #e74c3c;
+        }
+        
+        .progress-container {
+            width: 100%;
+            height: 10px;
+            background-color: #ecf0f1;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background-color: #e74c3c;
+            border-radius: 5px;
+            width: 0%;
+            transition: width 1s linear;
+        }
+        
+        .status {
+            margin-top: 20px;
+            font-size: 1.2rem;
+            color: #7f8c8d;
+        }
+        
+        .counter {
+            margin-top: 10px;
+            font-size: 0.9rem;
+            color: #95a5a6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="timer" id="timer">25:00</div>
+        <div class="progress-container">
+            <div class="progress-bar" id="progress"></div>
+        </div>
+        <div class="status" id="status">第一个番茄钟</div>
+        <div class="counter" id="counter">已完成: 0/4</div>
+    </div>
+    <script>
+        const workDuration = 25 * 60; // 25分钟工作时间
+        const shortBreak = 5 * 60;    // 5分钟短休息
+        const longBreak = 15 * 60;    // 15分钟长休息
+        let timeLeft = workDuration;
+        let isWorking = true;
+        let pomodoroCount = 0;
+        let timer;
+        const timerDisplay = document.getElementById('timer');
+        const progressBar = document.getElementById('progress');
+        const statusText = document.getElementById('status');
+        const counterText = document.getElementById('counter');
+        window.onload = startTimer;
+        function startTimer() {
+            updateDisplay();
+            timer = setInterval(() => {
+                timeLeft--;
+                updateDisplay();
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    playSound();
+                    if (isWorking) {
+                        isWorking = false;
+                        pomodoroCount++;
+                        counterText.textContent = `已完成: ${pomodoroCount}/4`;
+                        if (pomodoroCount % 4 === 0) {
+                            timeLeft = longBreak;
+                            statusText.textContent = "长休息时间";
+                            statusText.style.color = "#3498db";
+                            timerDisplay.style.color = "#3498db";
+                            progressBar.style.backgroundColor = "#3498db";
+                        } else {
+                            timeLeft = shortBreak;
+                            statusText.textContent = "短休息时间";
+                            statusText.style.color = "#2ecc71";
+                            timerDisplay.style.color = "#2ecc71";
+                            progressBar.style.backgroundColor = "#2ecc71";
+                        }
+                    } else {
+                        isWorking = true;
+                        timeLeft = workDuration;
+                        const pomodoroNum = (pomodoroCount % 4) + 1;
+                        statusText.textContent = `第${pomodoroNum}个番茄钟`;
+                        statusText.style.color = "#e74c3c";
+                        timerDisplay.style.color = "#e74c3c";
+                        progressBar.style.backgroundColor = "#e74c3c";
+                    }
+                    setTimeout(startTimer, 1000);
+                }
+            }, 1000);
+        }
+        function updateDisplay() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            const totalTime = isWorking ? workDuration : 
+                            (pomodoroCount % 4 === 0 && !isWorking) ? longBreak : shortBreak;
+            const progress = ((totalTime - timeLeft) / totalTime) * 100;
+            progressBar.style.width = `${progress}%`;
+        }
+        function playSound() {
+            const audio = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-alarm-digital-clock-beep-989.mp3');
+            audio.play();
+        }
+    </script>
+</body>
+</html>
